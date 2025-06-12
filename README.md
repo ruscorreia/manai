@@ -19,74 +19,6 @@ O `manai` é um comando Linux que permite interagir com páginas de manual (man 
 - **Gestão de Sessões**: Mantém o contexto da conversa para perguntas de seguimento
 - **Configuração Simples**: Fácil configuração através de variáveis de ambiente
 
-## Instalação
-
-### Pré-requisitos
-
-1. **Python 3.6 ou superior**
-2. **Biblioteca requests**: `pip install requests`
-3. **Azure Function configurada** com o agente manai
-
-### Passos de Instalação
-
-1. **Descarregue o ficheiro `manai.py`**
-
-2. **Instale as dependências**:
-   ```bash
-   pip install requests
-   ```
-
-3. **Torne o script executável**:
-   ```bash
-   chmod +x manai.py
-   ```
-
-4. **Copie para um directório no PATH** (opcional):
-   ```bash
-   sudo cp manai.py /usr/local/bin/manai
-   ```
-
-## Configuração
-
-### Variáveis de Ambiente Obrigatórias
-
-Configure a URL da sua Azure Function:
-
-**Linux/macOS:**
-```bash
-export MANAI_AZURE_FUNCTION_URL='https://sua-function-app.azurewebsites.net/api/ManaiAgentHttpTrigger'
-```
-
-**Windows:**
-```cmd
-set MANAI_AZURE_FUNCTION_URL=https://sua-function-app.azurewebsites.net/api/ManaiAgentHttpTrigger
-```
-
-### Variáveis de Ambiente Opcionais
-
-Se a sua Azure Function requer uma chave de acesso:
-
-**Linux/macOS:**
-```bash
-export MANAI_FUNCTION_KEY='sua-chave-da-funcao'
-```
-
-**Windows:**
-```cmd
-set MANAI_FUNCTION_KEY=sua-chave-da-funcao
-```
-
-### Configuração Permanente
-
-Para tornar a configuração permanente, adicione as variáveis ao seu ficheiro de perfil:
-
-**Linux/macOS** (adicione ao `~/.bashrc` ou `~/.zshrc`):
-```bash
-echo 'export MANAI_AZURE_FUNCTION_URL="https://sua-function-app.azurewebsites.net/api/ManaiAgentHttpTrigger"' >> ~/.bashrc
-echo 'export MANAI_FUNCTION_KEY="sua-chave-da-funcao"' >> ~/.bashrc
-source ~/.bashrc
-```
-
 ## Utilização
 
 ### Comandos Básicos
@@ -147,15 +79,6 @@ manai --new-session "como instalar pacotes com apt?"
 
 ## Resolução de Problemas
 
-### Erro: "URL da Azure Function não configurada"
-
-**Causa**: A variável `MANAI_AZURE_FUNCTION_URL` não está definida.
-
-**Solução**:
-```bash
-export MANAI_AZURE_FUNCTION_URL='https://sua-function-app.azurewebsites.net/api/ManaiAgentHttpTrigger'
-```
-
 ### Erro: "Erro de comunicação"
 
 **Possíveis causas e soluções**:
@@ -199,15 +122,6 @@ Para debug, pode verificar:
 - Mensagens de erro detalhadas no terminal
 - Logs da Azure Function no portal Azure
 - Conectividade de rede
-
-## Migração da Versão 1.0
-
-Se está a migrar da versão anterior do manai:
-
-1. **Backup**: Guarde a versão anterior se necessário
-2. **Configuração**: Configure as novas variáveis de ambiente
-3. **Teste**: Teste com algumas perguntas simples
-4. **Sessões**: As sessões antigas não são compatíveis
 
 ## Desenvolvimento
 
