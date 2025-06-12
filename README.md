@@ -35,25 +35,28 @@ O `manai` é um comando Linux que permite interagir com páginas de manual (man 
 3. **Clone este repositorio**:
    ```bash
    git clone https://github.com/ruscorreia/manai.git
-   ```   
-1. **Clone este repositorio Descarregue o ficheiro `manai.py`**
-
-2. **Clone este repositorio Descarregue o ficheiro `manai.py`**
-
-3. **Instale as dependências**:
-   ```bash
-   pip install requests
    ```
-
-4. **Torne o script executável**:
+3. **Vá para a pasta de instalação**:
    ```bash
-   chmod +x manai.py
+   cd manai/install/
    ```
-
-5. **Copie para um directório no PATH** (opcional):
+4. **Torne os scripts executáveis**:
    ```bash
-   sudo cp manai.py /usr/local/bin/manai
+   chmod +x install_v2.sh
+   chmod +x uninstall_v2.sh
    ```
+4. **Execute o script de instalação**:
+   ```bash
+   ./install_v2.sh
+   ```
+4. **Teste com um exemplo**:
+```bash
+# Pergunta simples
+manai "como listar ficheiros ocultos no Linux?"
+
+# Pergunta em inglês
+manai "how to create a directory with specific permissions?"
+```
    
 ## Utilização
 
