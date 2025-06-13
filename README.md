@@ -58,8 +58,8 @@
 # Simple question
 manai "how to list hidden files in Linux?"
 
-# Question in English
-manai "how to create a directory with specific permissions?"
+# Question in Spanish
+manai "¿cómo crear un directorio con permisos específicos?"
 ```
    
 ## Usage
