@@ -1,205 +1,205 @@
-# Manai - Assistente Linux com IA (Versão 2.0)
+# Manai - Linux AI Assistant (Version 2.0)
 
-## Descrição
+## Description
 
-O `manai` é um comando Linux que permite interagir com páginas de manual (man pages) de forma intuitiva, utilizando linguagem natural e inteligência artificial. Esta versão 2.0 integra-se com uma Azure Function que comunica com um agente de IA no Azure AI Foundry.
+`manai` is a Linux command that allows you to interact with manual pages (man pages) intuitively using natural language and artificial intelligence. This version 2.0 integrates with an Azure Function that communicates with an AI agent in Azure AI Foundry.
 
-## Funcionalidades
+## Features
 
-### Versão 2.0 - Integração com Azure AI
-- **Processamento com IA Real**: Utiliza um agente de IA no Azure AI Foundry
-- **Suporte Multilingue**: Aceita perguntas em qualquer idioma e responde no mesmo idioma
-- **Sessões Contínuas**: Mantém contexto entre perguntas para conversações naturais
-- **Interface Melhorada**: Feedback visual e mensagens de erro mais claras
-- **Configuração Flexível**: Suporte para diferentes ambientes através de variáveis de ambiente
+### Version 2.0 - Azure AI Integration
+- **Real AI Processing**: Uses an AI agent in Azure AI Foundry
+- **Multilingual Support**: Accepts questions in any language and responds in the same language
+- **Continuous Sessions**: Maintains context between questions for natural conversations
+- **Improved Interface**: Enhanced visual feedback and clearer error messages
+- **Flexible Configuration**: Supports different environments through environment variables
 
-### Funcionalidades Principais
-- **Interação por Linguagem Natural**: Aceita perguntas em português, inglês ou qualquer outro idioma
-- **Respostas Contextuais**: Fornece respostas precisas baseadas nas páginas man do Linux
-- **Gestão de Sessões**: Mantém o contexto da conversa para perguntas de seguimento
-- **Configuração Simples**: Fácil configuração através de variáveis de ambiente
+### Core Features
+- **Natural Language Interaction**: Accepts questions in Portuguese, English, or any other language
+- **Contextual Responses**: Provides accurate answers based on Linux man pages
+- **Session Management**: Maintains conversation context for follow-up questions
+- **Simple Configuration**: Easy setup via environment variables
 
-## Instalação
+## Installation
 
-### Pré-requisitos
+### Prerequisites
 
-1. **Python 3.6 ou superior**
-2. **Biblioteca requests**: `pip install requests`
+1. **Python 3.6 or higher**
+2. **Requests library**: `pip install requests`
 
-### Passos de Instalação
+### Installation Steps
 
-1. **Instale as dependências**:
+1. **Install dependencies**:
    ```bash
    pip install requests
    ```
-3. **Clone este repositorio**:
+2. **Clone this repository**:
    ```bash
    git clone https://github.com/ruscorreia/manai.git
    ```
-3. **Vá para a pasta de instalação**:
+3. **Navigate to the installation folder**:
    ```bash
    cd manai/install/
    ```
-4. **Torne os scripts executáveis**:
+4. **Make the scripts executable**:
    ```bash
    chmod +x install_v2.sh
    chmod +x uninstall_v2.sh
    ```
-4. **Execute o script de instalação**:
+5. **Run the installation script**:
    ```bash
    ./install_v2.sh
    ```
-5. **Configurar a gestão de sessões**:
+6. **Configure session management**:
    ```bash
    chmod +w ~/.manai_session
    ```
-6. **Teste com um exemplo**:
+7. **Test with an example**:
 ```bash
-# Pergunta simples
-manai "como listar ficheiros ocultos no Linux?"
+# Simple question
+manai "how to list hidden files in Linux?"
 
-# Pergunta em inglês
+# Question in English
 manai "how to create a directory with specific permissions?"
 ```
    
-## Utilização
+## Usage
 
-### Comandos Básicos
+### Basic Commands
 
 ```bash
-# Pergunta simples
-manai "como listar ficheiros ocultos no Linux?"
+# Simple question
+manai "how to list hidden files in Linux?"
 
-# Pergunta em inglês
+# Question in English
 manai "how to create a directory with specific permissions?"
 
-# Ver informações de configuração
+# View configuration information
 manai --config
 
-# Iniciar nova sessão (ignorar contexto anterior)
-manai --new-session "como usar o comando find?"
+# Start a new session (ignore previous context)
+manai --new-session "how to use the find command?"
 
-# Ver versão
+# View version
 manai --version
 
-# Ver ajuda
+# View help
 manai --help
 ```
 
-### Exemplos de Utilização
+### Usage Examples
 
 ```bash
-# Perguntas sobre comandos básicos
-manai "como copiar ficheiros?"
-manai "criar um directório"
-manai "ver o conteúdo de um ficheiro"
+# Questions about basic commands
+manai "how to copy files?"
+manai "create a directory"
+manai "view the contents of a file"
 
-# Perguntas mais específicas
-manai "como encontrar ficheiros modificados nas últimas 24 horas?"
-manai "definir permissões 755 para um ficheiro"
-manai "comprimir uma pasta com tar"
+# More specific questions
+manai "how to find files modified in the last 24 hours?"
+manai "set permissions to 755 for a file"
+manai "compress a folder with tar"
 
-# Conversação contínua
-manai "como usar o comando grep?"
-manai "e como posso usar grep com expressões regulares?"
-manai "mostrar apenas o número da linha onde encontrou?"
+# Continuous conversation
+manai "how to use the grep command?"
+manai "and how can I use grep with regular expressions?"
+manai "show only the line number where it was found?"
 ```
 
-### Gestão de Sessões
+### Session Management
 
-O manai mantém automaticamente o contexto da conversa:
+Manai automatically maintains conversation context:
 
 ```bash
-# Primeira pergunta
-manai "como criar um utilizador no Linux?"
+# First question
+manai "how to create a user in Linux?"
 
-# Pergunta de seguimento (usa o contexto anterior)
-manai "e como definir uma palavra-passe para esse utilizador?"
+# Follow-up question (uses previous context)
+manai "and how to set a password for that user?"
 
-# Iniciar nova conversa
-manai --new-session "como instalar pacotes com apt?"
+# Start a new conversation
+manai --new-session "how to install packages with apt?"
 ```
 
-## Resolução de Problemas
+## Troubleshooting
 
-### Erro: "Erro de comunicação"
+### Error: "Communication error"
 
-**Possíveis causas e soluções**:
+**Possible causes and solutions**:
 
-1. **Sem ligação à internet**: Verifique a sua conectividade
-2. **URL incorrecta**: Confirme a URL da Azure Function
-3. **Chave inválida**: Verifique a chave da função
-4. **Function App inactiva**: A função pode estar a "despertar" (cold start)
+1. **No internet connection**: Check your connectivity
+2. **Incorrect URL**: Confirm the Azure Function URL
+3. **Invalid key**: Verify the function key
+4. **Inactive Function App**: The function may be "waking up" (cold start)
 
-### Erro: "Resposta inválida do servidor"
+### Error: "Invalid server response"
 
-**Causa**: A Azure Function retornou uma resposta não-JSON.
+**Cause**: The Azure Function returned a non-JSON response.
 
-**Soluções**:
-- Verifique se a Azure Function está a funcionar correctamente
-- Confirme se está a usar a URL correcta do endpoint
-- Verifique os logs da Azure Function para erros
+**Solutions**:
+- Check if the Azure Function is running correctly
+- Confirm you are using the correct endpoint URL
+- Check Azure Function logs for errors
 
-### Problemas de Sessão
+### Session Issues
 
-Se as sessões não estão a funcionar:
+If sessions are not working:
 
-1. **Verificar permissões**: O ficheiro `~/.manai_session` precisa de permissões de escrita
-2. **Espaço em disco**: Certifique-se de que há espaço disponível
-3. **Reiniciar sessão**: Use `--new-session` para começar de novo
+1. **Check permissions**: The `~/.manai_session` file needs write permissions
+2. **Disk space**: Ensure there is available space
+3. **Restart session**: Use `--new-session` to start fresh
 
-## Funcionalidades Avançadas
+## Advanced Features
 
-### Ficheiro de Sessão
+### Session File
 
-O manai guarda o ID da thread em `~/.manai_session` para manter o contexto entre execuções. Este ficheiro é criado automaticamente e pode ser removido para reiniciar todas as sessões.
+Manai saves the thread ID in `~/.manai_session` to maintain context between executions. This file is created automatically and can be deleted to reset all sessions.
 
-### Timeout e Retry
+### Timeout and Retry
 
-- **Timeout**: 60 segundos por requisição
-- **Retry**: Não implementado (a Azure Function tem o seu próprio retry)
+- **Timeout**: 60 seconds per request
+- **Retry**: Not implemented (Azure Function has its own retry mechanism)
 
 ### Logging
 
-Para debug, pode verificar:
-- Mensagens de erro detalhadas no terminal
-- Logs da Azure Function no portal Azure
-- Conectividade de rede
+For debugging, you can check:
+- Detailed error messages in the terminal
+- Azure Function logs in the Azure portal
+- Network connectivity
 
-## Desenvolvimento
+## Development
 
-### Estrutura do Código
+### Code Structure
 
-- `ManaiClient`: Classe principal para comunicação com a Azure Function
-- `get_config()`: Gestão de configuração
-- `main()`: Interface de linha de comando
+- `ManaiClient`: Main class for communication with the Azure Function
+- `get_config()`: Configuration management
+- `main()`: Command-line interface
 
-### Dependências
+### Dependencies
 
-- `requests`: Para comunicação HTTP
-- `json`: Para processamento de dados
-- `argparse`: Para interface de linha de comando
-- `os`: Para variáveis de ambiente e ficheiros
+- `requests`: For HTTP communication
+- `json`: For data processing
+- `argparse`: For command-line interface
+- `os`: For environment variables and files
 
-## Licença
+## License
 
-Este projeto está licenciado sob a [Licença MIT](LICENSE).
+This project is licensed under the [MIT License](LICENSE).
 
-## Suporte
+## Support
 
-Para problemas ou sugestões:
-1. Verifique a secção de resolução de problemas
-2. Confirme a configuração da Azure Function
-3. Verifique os logs da Azure Function no portal Azure
+For issues or suggestions:
+1. Check the troubleshooting section
+2. Verify the Azure Function configuration
+3. Check Azure Function logs in the Azure portal
 
 ## Changelog
 
-### Versão 2.0.0
-- Integração completa com Azure Function
-- Suporte para múltiplos idiomas
-- Sistema de sessões melhorado
-- Interface de utilizador aprimorada
-- Configuração através de variáveis de ambiente
+### Version 2.0.0
+- Full integration with Azure Function
+- Support for multiple languages
+- Improved session system
+- Enhanced user interface
+- Configuration via environment variables
 
-### Versão 1.0.0
-- Versão inicial com processamento local básico
+### Version 1.0.0
+- Initial version with basic local processing
