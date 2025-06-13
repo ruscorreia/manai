@@ -1,5 +1,5 @@
 # Manai - Assistente Linux com IA (Versão 2.0)
-
+[Read this page in English](http....README.md)
 ## Descrição
 
 O `manai` é um comando Linux que permite interagir com páginas de manual (man pages) de forma intuitiva, utilizando linguagem natural e inteligência artificial. Esta versão 2.0 integra-se com uma Azure Function que comunica com um agente de IA no Azure AI Foundry.
