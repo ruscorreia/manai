@@ -1,38 +1,55 @@
 #!/bin/bash
 
-# Script de desinstalação para o Manai v2.0
-
 SCRIPT_NAME="manai"
-INSTALL_DIR="/usr/local/bin"
+INSTALL_DIR="$HOME/.local/bin"
+EXPORT_LINE="export PATH=\"$INSTALL_DIR:\$PATH\""
 
 echo "A desinstalar o comando $SCRIPT_NAME..."
 
-# Verificar se o comando está instalado
+# Remover o arquivo do comando
 if [ -f "$INSTALL_DIR/$SCRIPT_NAME" ]; then
-    # Remover o comando
-    sudo rm "$INSTALL_DIR/$SCRIPT_NAME"
-    
-    if [ $? -eq 0 ]; then
-        echo "Comando $SCRIPT_NAME removido com sucesso!"
-        
-        # Remover ficheiro de sessão se existir
-        SESSION_FILE="$HOME/.manai_session"
-        if [ -f "$SESSION_FILE" ]; then
-            rm "$SESSION_FILE"
-            echo "Ficheiro de sessão removido."
-        fi
-        
-        echo ""
-        echo "NOTA: As variáveis de ambiente não foram removidas."
-        echo "Se desejar, pode remover manualmente:"
-        echo "- MANAI_AZURE_FUNCTION_URL"
-        echo "- MANAI_FUNCTION_KEY"
-        
-    else
-        echo "Erro: Falha ao remover o comando!"
-        exit 1
-    fi
+    rm "$INSTALL_DIR/$SCRIPT_NAME"
+    echo "Removido $INSTALL_DIR/$SCRIPT_NAME"
 else
-    echo "O comando $SCRIPT_NAME não está instalado."
+    echo "Arquivo $INSTALL_DIR/$SCRIPT_NAME não encontrado."
 fi
 
+# Função para remover a linha do PATH do arquivo shellrc
+remove_path_from_shellrc() {
+    local shell_rc="$1"
+    if [ -f "$shell_rc" ]; then
+        if grep -Fxq "$EXPORT_LINE" "$shell_rc"; then
+            # Criar um arquivo temporário sem a linha de exportação
+            grep -v -F "$EXPORT_LINE" "$shell_rc" > "${shell_rc}.tmp" && mv "${shell_rc}.tmp" "$shell_rc"
+            echo "Removido $EXPORT_LINE do $shell_rc"
+        else
+            echo "Linha $EXPORT_LINE não encontrada em $shell_rc"
+        fi
+    else
+        echo "Arquivo $shell_rc não encontrado."
+    fi
+}
+
+# Detectar shell do usuário e remover PATH
+USER_SHELL=$(basename "$SHELL")
+
+case "$USER_SHELL" in
+    bash)
+        remove_path_from_shellrc "$HOME/.bashrc"
+        ;;
+    zsh)
+        remove_path_from_shellrc "$HOME/.zshrc"
+        ;;
+    *)
+        echo "Shell $USER_SHELL não suportada para remoção automática do PATH."
+        echo "Remova manualmente a linha:"
+        echo "  $EXPORT_LINE"
+        ;;
+esac
+
+echo ""
+echo "Desinstalação concluída."
+echo "Para aplicar as alterações, reinicie o terminal ou execute:"
+echo "  source ~/.bashrc    # para bash"
+echo "  ou"
+echo "  source ~/.zshrc     # para zsh"
