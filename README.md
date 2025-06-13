@@ -49,7 +49,11 @@ O `manai` é um comando Linux que permite interagir com páginas de manual (man 
    ```bash
    ./install_v2.sh
    ```
-4. **Teste com um exemplo**:
+5. **Configurar a gestão de sessões**:
+   ```bash
+   chmod +w ~/.manai_session
+   ```
+6. **Teste com um exemplo**:
 ```bash
 # Pergunta simples
 manai "como listar ficheiros ocultos no Linux?"
