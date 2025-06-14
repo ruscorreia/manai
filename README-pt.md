@@ -69,6 +69,7 @@ manai "how to create a directory with specific permissions?"
 ```bash
 # man pages
 manai memset
+
 # Pergunta simples
 manai "como listar ficheiros ocultos no Linux?"
 
