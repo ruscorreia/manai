@@ -90,6 +90,7 @@ manai --help
 
 ```bash
 # Questions about basic commands
+manai memset
 manai "how to copy files?"
 manai "create a directory"
 manai "view the contents of a file"
