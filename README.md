@@ -89,6 +89,9 @@ manai --help
 ### Usage Examples
 
 ```bash
+# man pages
+manai memset
+
 # Questions about basic commands
 manai memset
 manai "how to copy files?"
