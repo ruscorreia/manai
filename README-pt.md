@@ -67,6 +67,8 @@ manai "how to create a directory with specific permissions?"
 ### Comandos Básicos
 
 ```bash
+# man pages
+manai memset
 # Pergunta simples
 manai "como listar ficheiros ocultos no Linux?"
 
@@ -90,6 +92,7 @@ manai --help
 
 ```bash
 # Perguntas sobre comandos básicos
+manai memset
 manai "como copiar ficheiros?"
 manai "criar um directório"
 manai "ver o conteúdo de um ficheiro"
