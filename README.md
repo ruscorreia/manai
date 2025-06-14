@@ -49,9 +49,9 @@
    ```bash
    ./install_v2.sh
    ```
-6. **Configure session management**:
+6. **Configure language**:
    ```bash
-   chmod +w ~/.manai_session
+   manai "answer in English"
    ```
 7. **Test with an example**:
 ```bash
