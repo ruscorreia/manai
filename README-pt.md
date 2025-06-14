@@ -49,9 +49,9 @@ O `manai` é um comando Linux que permite interagir com páginas de manual (man 
    ```bash
    ./install_v2.sh
    ```
-5. **Configurar a gestão de sessões**:
+5. **Configurar o idioma**:
    ```bash
-   chmod +w ~/.manai_session
+   manai "responda em Portugês"
    ```
 6. **Teste com um exemplo**:
 ```bash
