@@ -20,7 +20,7 @@ class ManaiClient:
         """
         self.azure_function_url = azure_function_url
         self.function_key = function_key
-        self.session_file = os.path.expanduser("~/.manai_session")
+        self.session_file = os.path.expanduser("$HOME/.local/.manai_session")
         
     def _get_headers(self) -> dict:
         """Retorna os cabeçalhos HTTP necessários."""
@@ -90,8 +90,8 @@ class ManaiClient:
             result = response.json()
             
             # Guardar o thread ID se fornecido
-            if use_session and result.get('ThreadId'):
-                self._save_session(result['ThreadId'])
+            if use_session and result.get('threadId'):
+                self._save_session(result['threadId'])
             
             return result
             
@@ -200,8 +200,8 @@ def main():
         print(result.get('answer', 'Sem resposta'))
         
         # Mostrar informação da sessão se disponível
-        if result.get('ThreadId') and not args.new_session:
-            print(f"\n💬 Sessão: {result['ThreadId'][:8]}... (use --new-session para reiniciar)")
+        if result.get('threadId') and not args.new_session:
+            print(f"\n💬 Sessão: {result['threadId'][-8:]}... (use --new-session para reiniciar)")
     else:
         print(f"\n❌ Erro: {result.get('error', 'Erro desconhecido')}")
         
