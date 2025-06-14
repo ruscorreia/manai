@@ -67,6 +67,9 @@ manai "¿cómo crear un directorio con permisos específicos?"
 ### Basic Commands
 
 ```bash
+# man pages
+manai memset
+
 # Simple question
 manai "how to list hidden files in Linux?"
 
@@ -89,9 +92,6 @@ manai --help
 ### Usage Examples
 
 ```bash
-# man pages
-manai memset
-
 # Questions about basic commands
 manai memset
 manai "how to copy files?"
