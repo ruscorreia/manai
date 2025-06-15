@@ -229,11 +229,7 @@ class ManaiFreemiumAzureClient:
         # Carregar thread ID se usar sessão
         if use_session:
             session = self._load_session()
-            if session:
-                print("🔄 Session carregada:\n")
-                print(session)
             if session and session.get('ThreadId'):
-                print(f"🔄 Usando sessão existente: {session['ThreadId']}")
                 payload["ThreadId"] = session['ThreadId']
         
         # Tentar primeiro a função freemium (se disponível)
