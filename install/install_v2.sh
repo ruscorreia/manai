@@ -5,7 +5,7 @@
 
 SCRIPT_NAME="manai"
 INSTALL_DIR="$HOME/.local/bin"
-SCRIPT_FILE="manai_updated.py"
+SCRIPT_FILE="manai.py"
 
 echo "A instalar o comando $SCRIPT_NAME v2.0..."
 
@@ -42,6 +42,9 @@ cp "./$SCRIPT_FILE" "$INSTALL_DIR/$SCRIPT_NAME"
 
 # Tornar executável
 chmod +x "$INSTALL_DIR/$SCRIPT_NAME"
+
+# Para usar como comando 'manai' globalmente
+sudo ln-s $(pwd)/manai-freemium-cli.py /usr/local/bin/manai
 
 # Função para adicionar ao PATH no bashrc ou zshrc
 add_path_to_shellrc() {
