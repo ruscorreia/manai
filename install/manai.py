@@ -5,135 +5,433 @@ import json
 import os
 import sys
 import requests
-from typing import Optional
+import getpass
+from typing import Optional, Dict, Any
+from datetime import datetime
 
-class ManaiClient:
-    """Cliente para interagir com o agente manai através da Azure Function."""
+class ManaiFreemiumAzureClient:
+    """Cliente para interagir com o ManAI Freemium através das Azure Functions em produção."""
     
-    def __init__(self, azure_function_url: str, function_key: Optional[str] = None):
+    def __init__(self, base_url: str = "https://manai-agent-function-app.azurewebsites.net/api", 
+                 function_key: str = "58H0KD8feP9x2e6uqY1wkwW-6MqwrNkWI6U4-jdsSa5EAzFuACdqNA=="):
         """
-        Inicializa o cliente manai.
+        Inicializa o cliente ManAI Freemium para Azure.
         
         Args:
-            azure_function_url: URL da Azure Function
-            function_key: Chave da função (opcional se usar autenticação diferente)
+            base_url: URL base das Azure Functions em produção
+            function_key: Chave de acesso às Azure Functions
         """
-        self.azure_function_url = azure_function_url
+        self.base_url = base_url.rstrip('/')
         self.function_key = function_key
-        self.session_file = os.path.expanduser("$HOME/.local/.manai_session")
+        self.config_dir = os.path.expanduser("$HOME/.config/")
         
-    def _get_headers(self) -> dict:
-        """Retorna os cabeçalhos HTTP necessários."""
-        headers = {
-            "Content-Type": "application/json",
-            "User-Agent": "manai-cli/1.0"
-        }
+        self.config_file = os.path.join(self.config_dir, "manaiconfig.json")
+        self.session_file = os.path.join(self.config_dir, "manaisession.json")
         
-        if self.function_key:
-            headers["x-functions-key"] = self.function_key
-            
-        return headers
+        # Criar directório de configuração se não existir
+        os.makedirs(self.config_dir, exist_ok=True)
+        
+        # Carregar configuração
+        self.config = self._load_config()
+        
+    def _load_config(self) -> Dict[str, Any]:
+        """Carrega a configuração do utilizador."""
+        try:
+            if os.path.exists(self.config_file):
+                with open(self.config_file, 'r') as f:
+                    #print(f"🔄 Carregando configuração do utilizador... {self.config_file}")
+                    return json.load(f)
+        except (json.JSONDecodeError, IOError):
+            pass
+        return {}
     
-    def _load_session(self) -> Optional[str]:
-        """Carrega o ID da thread da sessão anterior."""
+    def _save_config(self):
+        """Guarda a configuração do utilizador."""
+        try:
+            with open(self.config_file, 'w') as f:
+                json.dump(self.config, f, indent=2)
+        except IOError as e:
+            print(f"⚠️  Aviso: Não foi possível guardar configuração: {e}")
+    
+    def _load_session(self) -> Optional[Dict[str, Any]]:
+        """Carrega informações da sessão anterior."""
         try:
             if os.path.exists(self.session_file):
                 with open(self.session_file, 'r') as f:
-                    data = json.load(f)
-                    return data.get('thread_id')
+                    #print(f"🔄 Carregando sessão anterior... {self.session_file}")
+                    return json.load(f)
         except (json.JSONDecodeError, IOError):
             pass
         return None
     
-    def _save_session(self, thread_id: str):
-        """Guarda o ID da thread para a próxima sessão."""
+    def _save_session(self, session_data: Dict[str, Any]):
+        """Guarda informações da sessão."""
         try:
             with open(self.session_file, 'w') as f:
-                json.dump({'thread_id': thread_id}, f)
-        except IOError:
-            # Se não conseguir guardar, continua sem sessão
-            pass
+                json.dump(session_data, f, indent=2)
+                #print(f"💾 Sessão guardada com sucesso {self.session_file}")
+        except IOError as e:
+            print(f"⚠️  Aviso: Não foi possível guardar sessão: {e}")
     
-    def ask_question(self, question: str, use_session: bool = True) -> dict:
+    def _get_headers(self, include_auth: bool = True, include_function_key: bool = True) -> Dict[str, str]:
+        """Retorna os cabeçalhos HTTP necessários."""
+        headers = {
+            "Content-Type": "application/json",
+            "User-Agent": "manai-freemium-azure-cli/2.0"
+        }
+        
+        # Adicionar chave da função Azure
+        if include_function_key and self.function_key:
+            headers["x-functions-key"] = self.function_key
+        
+        # Adicionar token JWT se disponível
+        if include_auth and self.config.get('token'):
+            headers["Authorization"] = f"Bearer {self.config['token']}"
+            
+        return headers
+    
+    def _make_request(self, endpoint: str, method: str = "GET", data: Optional[Dict] = None, 
+                     include_auth: bool = True, include_function_key: bool = True) -> Dict[str, Any]:
+        """Faz uma requisição HTTP para a API Azure."""
+        url = f"{self.base_url}/{endpoint}"
+        headers = self._get_headers(include_auth, include_function_key)
+        
+        try:
+            if method.upper() == "GET":
+                response = requests.get(url, headers=headers, timeout=120)  # Timeout maior para Azure
+            elif method.upper() == "POST":
+                response = requests.post(url, headers=headers, json=data, timeout=120)
+            elif method.upper() == "PUT":
+                response = requests.put(url, headers=headers, json=data, timeout=120)
+            else:
+                return {"success": False, "error": f"Método HTTP não suportado: {method}"}
+            
+            # Verificar status codes específicos
+            if response.status_code == 401:
+                return {"success": False, "error": "Token inválido ou expirado. Execute 'manai login'"}
+            elif response.status_code == 403:
+                return {"success": False, "error": "Acesso negado. Verifique a chave da função Azure"}
+            elif response.status_code == 404:
+                return {"success": False, "error": f"Endpoint não encontrado: {endpoint}"}
+            elif response.status_code == 429:
+                return {"success": False, "error": "Limite de consultas atingido. Considere fazer upgrade para ManAI Pro"}
+            elif response.status_code == 500:
+                return {"success": False, "error": "Erro interno do servidor Azure. Tente novamente mais tarde"}
+            
+            response.raise_for_status()
+            
+            # Tentar fazer parse do JSON
+            try:
+                return response.json()
+            except json.JSONDecodeError:
+                # Se não for JSON válido, retornar texto como resposta
+                return {"success": True, "message": response.text}
+            
+        except requests.exceptions.Timeout:
+            return {"success": False, "error": "Timeout na comunicação com Azure. Tente novamente"}
+        except requests.exceptions.ConnectionError:
+            return {"success": False, "error": "Erro de conexão com Azure. Verifique sua internet"}
+        except requests.exceptions.RequestException as e:
+            return {"success": False, "error": f"Erro de comunicação: {str(e)}"}
+    
+    def register(self, email: str, password: str, first_name: str, last_name: str, 
+                language: str = "pt") -> Dict[str, Any]:
+        """Regista um novo utilizador."""
+        data = {
+            "Email": email,
+            "Password": password,
+            "FirstName": first_name,
+            "LastName": last_name,
+            "PreferredLanguage": language
+        }
+        
+        result = self._make_request("RegisterUser", "POST", data, include_auth=False)
+        
+        if result.get("success"):
+            # Guardar token e informações do utilizador
+            self.config["token"] = result["token"]
+            self.config["user"] = result["user"]
+            self._save_config()
+            
+        return result
+    
+    def login(self, email: str, password: str) -> Dict[str, Any]:
+        """Faz login do utilizador."""
+        data = {
+            "Email": email,
+            "Password": password
+        }
+        
+        result = self._make_request("LoginUser", "POST", data, include_auth=False)
+        
+        if result.get("success"):
+            # Guardar token e informações do utilizador
+            self.config["token"] = result["token"]
+            self.config["user"] = result["user"]
+            self._save_config()
+            
+        return result
+    
+    def logout(self):
+        """Faz logout do utilizador."""
+        self.config.pop("token", None)
+        self.config.pop("user", None)
+        self._save_config()
+        
+        # Limpar sessão
+        if os.path.exists(self.session_file):
+            os.remove(self.session_file)
+    
+    def get_profile(self) -> Dict[str, Any]:
+        """Obtém o perfil do utilizador."""
+        return self._make_request("GetUserProfile", "GET")
+    
+    def get_tier_config(self) -> Dict[str, Any]:
+        """Obtém a configuração do tier actual."""
+        return self._make_request("GetTierConfiguration", "GET")
+    
+    def check_usage_limits(self, language: str = "pt") -> Dict[str, Any]:
+        """Verifica os limites de utilização."""
+        data = {"Language": language}
+        return self._make_request("CheckUsageLimit", "POST", data)
+    
+    def get_usage_stats(self) -> Dict[str, Any]:
+        """Obtém estatísticas de utilização."""
+        return self._make_request("GetUsageStatistics", "GET")
+    
+    def check_feature_access(self, feature_name: str) -> Dict[str, Any]:
+        """Verifica acesso a uma funcionalidade específica."""
+        data = {"FeatureName": feature_name}
+        return self._make_request("CheckFeatureAccess", "POST", data)
+    
+    def ask_question(self, question: str, language: str = "pt", use_session: bool = True) -> Dict[str, Any]:
         """
-        Envia uma pergunta para o agente manai.
+        Envia uma pergunta para o agente ManAI.
         
         Args:
             question: A pergunta a fazer ao agente
+            language: Idioma da resposta
             use_session: Se deve usar a sessão anterior para contexto
             
         Returns:
             Dicionário com a resposta do agente
         """
+        # Verificar se está autenticado
+        if not self.config.get('token'):
+            return {"success": False, "error": "É necessário fazer login primeiro. Execute 'manai login'"}
+        
         # Preparar o payload
-        payload = {"Question": question}
+        payload = {
+            "Question": question,
+            "Language": language
+        }
         
         # Carregar thread ID se usar sessão
         if use_session:
-            thread_id = self._load_session()
-            if thread_id:
-                payload["ThreadId"] = thread_id
+            session = self._load_session()
+            if session:
+                print("🔄 Session carregada:\n")
+                print(session)
+            if session and session.get('ThreadId'):
+                print(f"🔄 Usando sessão existente: {session['ThreadId']}")
+                payload["ThreadId"] = session['ThreadId']
         
+        # Tentar primeiro a função freemium (se disponível)
+        result = self._make_request("ManaiAgentFreemiumHttpTrigger", "POST", payload)
+        
+         # Guardar informações da sessão se bem-sucedido
+        if result.get('success') and use_session:
+            print("💾 Guardando sessão...")
+            thread_id = result.get('threadId') or result.get('ThreadId')
+            print(f"🔗 Sessão ID: {thread_id}")
+            session_id = result.get('sessionId') or result.get('SessionId')
+            
+            if thread_id:
+                session_data = {
+                    'ThreadId': thread_id,
+                    'SessionId': session_id,
+                    'LastUsed': datetime.now().isoformat()
+                }
+                self._save_session(session_data)
+        
+        return result
+    
+    def is_authenticated(self) -> bool:
+        """Verifica se o utilizador está autenticado."""
+        if not self.config.get('token'):
+            return False
+        
+        # Tentar validar token (se função disponível)
+        result = self._make_request("ValidateToken", "POST")
+        if result.get('valid') is not None:
+            return result.get('valid', False)
+        
+        # Se função de validação não disponível, assumir que token existe = autenticado
+        return True
+    
+    def test_connection(self) -> Dict[str, Any]:
+        """Testa a conexão com as Azure Functions."""
         try:
-            # Fazer a requisição HTTP
-            response = requests.post(
-                self.azure_function_url,
-                headers=self._get_headers(),
-                json=payload,
-                timeout=60  # Timeout de 60 segundos
-            )
+            # Testar função original primeiro
+            result = self._make_request("ManaiAgentHttpTrigger", "GET", include_auth=False)
             
-            # Verificar se a resposta foi bem-sucedida
-            response.raise_for_status()
-            
-            # Processar a resposta JSON
-            result = response.json()
-            
-            # Guardar o thread ID se fornecido
-            if use_session and result.get('threadId'):
-                self._save_session(result['threadId'])
-            
-            return result
-            
-        except requests.exceptions.RequestException as e:
+            if result.get('success') or "método não permitido" in result.get('error', '').lower():
+                return {
+                    "success": True, 
+                    "message": "Conexão com Azure Functions estabelecida",
+                    "functions_available": ["ManaiAgentHttpTrigger"]
+                }
+            else:
+                return {
+                    "success": False,
+                    "error": f"Falha na conexão: {result.get('error')}"
+                }
+        except Exception as e:
             return {
                 "success": False,
-                "error": f"Erro de comunicação: {str(e)}"
-            }
-        except json.JSONDecodeError:
-            return {
-                "success": False,
-                "error": "Resposta inválida do servidor"
+                "error": f"Erro ao testar conexão: {str(e)}"
             }
 
-def get_config() -> tuple:
-    """
-    Obtém a configuração da Azure Function a partir de variáveis de ambiente.
-    
-    Returns:
-        Tupla com (url, function_key)
-    """
-    # URL da Azure Function
-    azure_function_url = "https://manai-agent-function-app.azurewebsites.net/api/ManaiAgentHttpTrigger"
-    
-    # Chave da função (opcional)
-    function_key = "58H0KD8feP9x2e6uqY1wkwW-6MqwrNkWI6U4-jdsSa5EAzFuACdqNA=="
-    
-    return azure_function_url, function_key
+def print_welcome():
+    """Imprime mensagem de boas-vindas."""
+    print("🤖 ManAI Freemium Azure - O seu assistente de comandos Linux com IA")
+    print("🌐 Conectado às Azure Functions em produção")
+    print("=" * 65)
 
-def print_help():
-    """Imprime informações de ajuda sobre configuração."""
-    print("\n" + "="*60)
-    print("\n" + "="*60)
+def print_tier_info(client: ManaiFreemiumAzureClient):
+    """Mostra informações sobre o tier actual."""
+    if not client.is_authenticated():
+        print("❌ Não autenticado. Execute 'manai login' primeiro.")
+        return
+    
+    # Tentar obter informações do perfil freemium
+    profile = client.get_profile()
+    tier_config = client.get_tier_config()
+    usage_stats = client.get_usage_stats()
+    
+    # Se funções freemium não disponíveis, mostrar informação básica
+    if not profile.get('success', True) and "não encontrado" in profile.get('error', '').lower():
+        print("ℹ️  Usando função Azure original (sem sistema freemium)")
+        print(f"👤 Utilizador: {client.config.get('user', {}).get('email', 'N/A')}")
+        print("🎯 Tier: ORIGINAL (sem limitações)")
+        print("📊 Consultas: Ilimitadas")
+        print("🌍 Idiomas: Todos suportados")
+        return
+    
+    if not profile.get('success', True):
+        print(f"❌ Erro ao obter perfil: {profile.get('error')}")
+        return
+    
+    if not tier_config.get('success', True):
+        print(f"❌ Erro ao obter configuração: {tier_config.get('error')}")
+        return
+    
+    print(f"\n👤 Utilizador: {client.config.get('user', {}).get('email', 'N/A')}")
+    print(f"🎯 Tier: {tier_config.get('tierType', 'N/A').upper()}")
+    
+    if tier_config.get('dailyQueryLimit', 0) > 0:
+        today_usage = 0
+        if usage_stats.get('success', True) and usage_stats.get('dailyStatistics'):
+            today_stats = next((s for s in usage_stats['dailyStatistics'] 
+                              if s['date'] == datetime.now().strftime('%Y-%m-%d')), None)
+            if today_stats:
+                today_usage = today_stats['queriesCount']
+        
+        print(f"📊 Utilização hoje: {today_usage}/{tier_config['dailyQueryLimit']}")
+    else:
+        print("📊 Consultas: Ilimitadas")
+    
+    print(f"🌍 Idiomas: {', '.join(tier_config.get('supportedLanguages', []))}")
+    
+    features = tier_config.get('features', {})
+    print(f"✨ Funcionalidades:")
+    print(f"   • Memória longo prazo: {'✅' if features.get('longTermMemory') else '❌'}")
+    print(f"   • Comandos personalizados: {'✅' if features.get('customCommands') else '❌'}")
+    print(f"   • Integração IDEs: {'✅' if features.get('ideIntegration') else '❌'}")
+    print(f"   • Analytics: {'✅' if features.get('analytics') else '❌'}")
+
+def interactive_register(client: ManaiFreemiumAzureClient):
+    """Processo interactivo de registo."""
+    print("\n📝 Registo de novo utilizador")
+    print("-" * 30)
+    
+    email = input("Email: ").strip()
+    if not email:
+        print("❌ Email é obrigatório")
+        return False
+    
+    password = getpass.getpass("Password: ")
+    if len(password) < 8:
+        print("❌ Password deve ter pelo menos 8 caracteres")
+        return False
+    
+    first_name = input("Primeiro nome: ").strip()
+    last_name = input("Último nome: ").strip()
+    
+    print("\nIdiomas disponíveis: pt (português), en (inglês), es (espanhol)")
+    language = input("Idioma preferido [pt]: ").strip() or "pt"
+    
+    print("\n⏳ A registar utilizador no Azure...")
+    result = client.register(email, password, first_name, last_name, language)
+    
+    if result.get("success"):
+        print("✅ Registo bem-sucedido!")
+        print(f"🎯 Tier inicial: {result['user']['tierType'].upper()}")
+        return True
+    else:
+        error_msg = result.get('error', '')
+        if "não encontrado" in error_msg.lower():
+            print("⚠️  Função de registo não disponível na versão actual do Azure")
+            print("💡 Contacte o administrador para criar conta manualmente")
+        else:
+            print(f"❌ Erro no registo: {error_msg}")
+        return False
+
+def interactive_login(client: ManaiFreemiumAzureClient):
+    """Processo interactivo de login."""
+    print("\n🔐 Login")
+    print("-" * 10)
+    
+    email = input("Email: ").strip()
+    if not email:
+        print("❌ Email é obrigatório")
+        return False
+    
+    password = getpass.getpass("Password: ")
+    
+    print("\n⏳ A fazer login no Azure...")
+    result = client.login(email, password)
+    
+    if result.get("success"):
+        print("✅ Login bem-sucedido!")
+        print(f"👤 Bem-vindo, {result['user']['firstName']}!")
+        print(f"🎯 Tier: {result['user']['tierType'].upper()}")
+        return True
+    else:
+        error_msg = result.get('error', '')
+        if "não encontrado" in error_msg.lower():
+            print("⚠️  Sistema de login freemium não disponível")
+            print("💡 Usando modo compatibilidade (sem autenticação)")
+            # Simular login bem-sucedido para compatibilidade
+            client.config["user"] = {"Email": email, "FirstName": "Utilizador", "tierType": "original"}
+            client.config["token"] = "compatibility_mode"
+            client._save_config()
+            return True
+        else:
+            print(f"❌ Erro no login: {error_msg}")
+        return False
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Manai - O seu assistente de páginas man com IA",
+        description="ManAI Freemium Azure - O seu assistente de comandos Linux com IA",
         epilog="Exemplos:\n"
                "  manai 'como listar ficheiros ocultos?'\n"
                "  manai 'criar um directório com permissões específicas'\n"
                "  manai --new-session 'como usar o comando find?'\n"
-               "  manai --config",
+               "  manai --register\n"
+               "  manai --login\n"
+               "  manai --status\n"
+               "  manai --test-connection",
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
     
@@ -151,69 +449,227 @@ def main():
     )
     
     parser.add_argument(
-        "--config",
+        "--language", "-l",
+        type=str,
+        default="pt",
+        choices=["pt", "en", "es", "fr", "de", "it", "ja", "zh", "ru", "ar"],
+        help="Idioma da resposta (padrão: pt)"
+    )
+    
+    parser.add_argument(
+        "--register",
         action="store_true",
-        help="Mostrar informações de configuração"
+        help="Registar novo utilizador"
+    )
+    
+    parser.add_argument(
+        "--login",
+        action="store_true",
+        help="Fazer login"
+    )
+    
+    parser.add_argument(
+        "--logout",
+        action="store_true",
+        help="Fazer logout"
+    )
+    
+    parser.add_argument(
+        "--status",
+        action="store_true",
+        help="Mostrar estado actual e informações do tier"
+    )
+    
+    parser.add_argument(
+        "--stats",
+        action="store_true",
+        help="Mostrar estatísticas de utilização"
+    )
+    
+    parser.add_argument(
+        "--check-feature",
+        type=str,
+        help="Verificar acesso a uma funcionalidade específica"
+    )
+    
+    parser.add_argument(
+        "--test-connection",
+        action="store_true",
+        help="Testar conexão com Azure Functions"
+    )
+    
+    parser.add_argument(
+        "--url",
+        type=str,
+        default="https://manai-agent-function-app.azurewebsites.net/api",
+        help="URL base da API Azure (padrão: https://manai-agent-function-app.azurewebsites.net/api)"
+    )
+    
+    parser.add_argument(
+        "--function-key",
+        type=str,
+        default="58H0KD8feP9x2e6uqY1wkwW-6MqwrNkWI6U4-jdsSa5EAzFuACdqNA==",
+        help="Chave de acesso às Azure Functions"
     )
     
     parser.add_argument(
         "--version",
         action="version",
-        version="manai 2.0.0 - Integração com Azure AI"
+        version="manai-freemium-azure 2.0.0 - Modelo Freemium com Azure Functions"
     )
 
     args = parser.parse_args()
     
-    # Mostrar configuração se solicitado
-    if args.config:
-        print_help()
+    # Criar cliente Azure
+    client = ManaiFreemiumAzureClient(args.url, args.function_key)
+    
+    # Testar conexão se solicitado
+    if args.test_connection:
+        print("🔍 Testando conexão com Azure Functions...")
+        result = client.test_connection()
+        if result.get('success'):
+            print(f"✅ {result.get('message')}")
+            if result.get('functions_available'):
+                print(f"📋 Funções disponíveis: {', '.join(result['functions_available'])}")
+        else:
+            print(f"❌ {result.get('error')}")
         return
     
-    # Verificar se foi fornecida uma pergunta
-    if not args.query:
+    # Mostrar boas-vindas se nenhum comando específico
+    if not any([args.register, args.login, args.logout, args.status, args.stats, args.check_feature, args.query]):
+        print_welcome()
         parser.print_help()
-        print_help()
         return
     
-    # Obter configuração
-    azure_function_url, function_key = get_config()
+    # Processar comandos de gestão de conta
+    if args.register:
+        interactive_register(client)
+        return
     
-    # Verificar se a URL está configurada
-    if not azure_function_url or azure_function_url.startswith("https://sua-function-app"):
-        print("❌ Erro: URL da Azure Function não configurada.")
-        print("Execute 'manai --config' para ver as instruções de configuração.")
-        sys.exit(1)
+    if args.login:
+        interactive_login(client)
+        return
     
-    # Criar cliente e fazer a pergunta
-    client = ManaiClient(azure_function_url, function_key)
+    if args.logout:
+        client.logout()
+        print("✅ Logout realizado com sucesso")
+        return
     
-    print(f"🤖 Pergunta: {args.query}")
-    print("⏳ A processar com IA...")
+    if args.status:
+        print_tier_info(client)
+        return
     
-    # Fazer a pergunta (nova sessão se solicitado)
-    result = client.ask_question(args.query, use_session=not args.new_session)
-    
-    # Mostrar resultado
-    if result.get('success'):
-        print("\n✅ Resposta do manai:")
-        print("-" * 50)
-        print(result.get('answer', 'Sem resposta'))
+    if args.stats:
+        if not client.is_authenticated():
+            print("❌ É necessário fazer login primeiro")
+            return
         
-        # Mostrar informação da sessão se disponível
-        if result.get('threadId') and not args.new_session:
-            print(f"\n💬 Sessão: {result['threadId'][-8:]}... (use --new-session para reiniciar)")
-    else:
-        print(f"\n❌ Erro: {result.get('error', 'Erro desconhecido')}")
+        stats = client.get_usage_stats()
+        if stats.get('success', True):
+            print(f"\n📊 Estatísticas de Utilização")
+            print("-" * 30)
+            print(f"Total de consultas: {stats.get('totalQueries', 0)}")
+            print(f"Média por dia: {stats.get('averageQueriesPerDay', 0):.1f}")
+            print(f"Tier actual: {stats.get('currentTier', 'N/A').upper()}")
+            
+            if stats.get('dailyStatistics'):
+                print("\nÚltimos 7 dias:")
+                for stat in stats['dailyStatistics'][:7]:
+                    date = datetime.fromisoformat(stat['date']).strftime('%d/%m')
+                    print(f"  {date}: {stat['queriesCount']} consultas")
+        else:
+            if "não encontrado" in stats.get('error', '').lower():
+                print("ℹ️  Estatísticas não disponíveis na versão actual")
+            else:
+                print(f"❌ Erro ao obter estatísticas: {stats.get('error')}")
+        return
+    
+    if args.check_feature:
+        if not client.is_authenticated():
+            print("❌ É necessário fazer login primeiro")
+            return
         
-        # Sugestões de resolução de problemas
-        if "comunicação" in result.get('error', '').lower():
-            print("\n🔧 Sugestões:")
-            print("- Verifique a sua ligação à internet")
-            print("- Confirme se a URL da Azure Function está correcta")
-            print("- Verifique se a chave da função está válida")
+        result = client.check_feature_access(args.check_feature)
+        if result.get('success', True):
+            feature = result.get('featureName', args.check_feature)
+            has_access = result.get('hasAccess', False)
+            required_tier = result.get('requiredTier', 'unknown')
+            
+            status = "✅ Disponível" if has_access else f"❌ Requer tier {required_tier.upper()}"
+            print(f"Funcionalidade '{feature}': {status}")
+        else:
+            if "não encontrado" in result.get('error', '').lower():
+                print("ℹ️  Verificação de funcionalidades não disponível na versão actual")
+            else:
+                print(f"❌ Erro: {result.get('error')}")
+        return
+    
+    # Processar pergunta
+    if args.query:
+        # Para compatibilidade, permitir perguntas mesmo sem autenticação explícita
+        if not client.is_authenticated():
+            print("⚠️  Modo compatibilidade - usando função Azure original")
+            # Simular autenticação para compatibilidade
+            client.config["token"] = "compatibility_mode"
         
-        sys.exit(1)
+        # Verificar limites se sistema freemium disponível
+        limits = client.check_usage_limits(args.language)
+        if limits.get('success') and not limits.get('canMakeQuery', True):
+            print("❌ Limite de consultas diárias atingido!")
+            print(f"📊 Utilização: {limits.get('currentUsage', 0)}/{limits.get('dailyLimit', 0)}")
+            print("💡 Considere fazer upgrade para ManAI Pro para consultas ilimitadas")
+            return
+        
+        print(f"🤖 Pergunta: {args.query}")
+        print("⏳ A processar com IA no Azure...")
+        
+        # Fazer a pergunta
+        result = client.ask_question(args.query, args.language, use_session=not args.new_session)
+        
+        # Mostrar resultado
+        if result.get('success'):
+            # Obter resposta (compatível com ambos os formatos)
+            answer = result.get('answer') or result.get('Answer', 'Sem resposta')
+            
+            print("\n✅ Resposta do ManAI:")
+            print("-" * 50)
+            print(answer)
+            
+            # Mostrar informação da utilização se disponível
+            usage_info = result.get('usageInfo', {})
+            if usage_info and usage_info.get('queriesUsedToday') != 'N/A':
+                used = usage_info.get('queriesUsedToday', 0)
+                limit = usage_info.get('dailyLimit', 0)
+                if limit > 0:
+                    print(f"\n📊 Utilização: {used}/{limit}")
+                    if used >= limit * 0.8:  # Aviso quando atingir 80%
+                        print("⚠️  Está próximo do limite diário. Considere upgrade para ManAI Pro")
+                else:
+                    print(f"\n📊 Consultas hoje: {used} (ilimitadas)")
+            
+            # Mostrar informação da sessão
+            thread_id = result.get('threadId') or result.get('ThreadId')
+            if thread_id and not args.new_session:
+                thread_short = thread_id[-8:] if len(thread_id) > 8 else thread_id
+                print(f"💬 Sessão: ...{thread_short} (use --new-session para reiniciar)")
+        else:
+            print(f"\n❌ Erro: {result.get('error', 'Erro desconhecido')}")
+            
+            # Sugestões baseadas no tipo de erro
+            error_msg = result.get('error', '').lower()
+            if "token" in error_msg or "autenticação" in error_msg:
+                print("\n🔧 Solução: Execute 'manai --login' para autenticar")
+            elif "limite" in error_msg:
+                print("\n🔧 Solução: Aguarde até amanhã ou faça upgrade para ManAI Pro")
+            elif "conexão" in error_msg or "timeout" in error_msg:
+                print("\n🔧 Sugestões:")
+                print("- Verifique a sua ligação à internet")
+                print("- Confirme se as Azure Functions estão disponíveis")
+                print(f"- Teste a conexão: manai --test-connection")
+            elif "chave" in error_msg or "403" in error_msg:
+                print("\n🔧 Solução: Verifique a chave de acesso às Azure Functions")
+            
+            sys.exit(1)
 
 if __name__ == "__main__":
     main()
-
