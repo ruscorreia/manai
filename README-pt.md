@@ -32,7 +32,7 @@ O `manai` é um comando Linux que permite interagir com páginas de manual (man 
    ```bash
    pip install requests
    ```
-3. **Clone este repositorio**:
+2. **Clone este repositorio**:
    ```bash
    git clone https://github.com/ruscorreia/manai.git
    ```
@@ -45,15 +45,16 @@ O `manai` é um comando Linux que permite interagir com páginas de manual (man 
    chmod +x install_v2.sh
    chmod +x uninstall_v2.sh
    ```
-4. **Execute o script de instalação**:
+5. **Execute o script de instalação**:
    ```bash
    ./install_v2.sh
+   source ~/.bashrc
    ```
-5. **Configurar o idioma**:
+6. **Configurar o idioma**:
    ```bash
    manai "responda em Portugês"
    ```
-6. **Teste com um exemplo**:
+7. **Teste com um exemplo**:
 ```bash
 # Pergunta simples
 manai "como listar ficheiros ocultos no Linux?"
