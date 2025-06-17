@@ -23,10 +23,9 @@ class ManaiFreemiumAzureClient:
         """
         self.base_url = base_url.rstrip('/')
         self.function_key = function_key
-        self.config_dir = os.path.expanduser("$HOME/.config/")
-        
-        self.config_file = os.path.join(self.config_dir, "manaiconfig.json")
-        self.session_file = os.path.join(self.config_dir, "manaisession.json")
+        self.config_dir = os.path.expanduser("~/.config/manai")
+        self.config_file = os.path.join(self.config_dir, "config.json")
+        self.session_file = os.path.join(self.config_dir, "session.json")
         
         # Criar directório de configuração se não existir
         os.makedirs(self.config_dir, exist_ok=True)
@@ -39,7 +38,6 @@ class ManaiFreemiumAzureClient:
         try:
             if os.path.exists(self.config_file):
                 with open(self.config_file, 'r') as f:
-                    #print(f"🔄 Carregando configuração do utilizador... {self.config_file}")
                     return json.load(f)
         except (json.JSONDecodeError, IOError):
             pass
@@ -58,7 +56,6 @@ class ManaiFreemiumAzureClient:
         try:
             if os.path.exists(self.session_file):
                 with open(self.session_file, 'r') as f:
-                    #print(f"🔄 Carregando sessão anterior... {self.session_file}")
                     return json.load(f)
         except (json.JSONDecodeError, IOError):
             pass
@@ -66,10 +63,10 @@ class ManaiFreemiumAzureClient:
     
     def _save_session(self, session_data: Dict[str, Any]):
         """Guarda informações da sessão."""
+        print(f"🔒 Guardando sessão...{session_data}")
         try:
             with open(self.session_file, 'w') as f:
                 json.dump(session_data, f, indent=2)
-                #print(f"💾 Sessão guardada com sucesso {self.session_file}")
         except IOError as e:
             print(f"⚠️  Aviso: Não foi possível guardar sessão: {e}")
     
@@ -141,7 +138,7 @@ class ManaiFreemiumAzureClient:
             "Email": email,
             "Password": password,
             "FirstName": first_name,
-            "LastName": last_name,
+            "FastName": last_name,
             "PreferredLanguage": language
         }
         
@@ -201,7 +198,7 @@ class ManaiFreemiumAzureClient:
     
     def check_feature_access(self, feature_name: str) -> Dict[str, Any]:
         """Verifica acesso a uma funcionalidade específica."""
-        data = {"FeatureName": feature_name}
+        data = {"featureName": feature_name}
         return self._make_request("CheckFeatureAccess", "POST", data)
     
     def ask_question(self, question: str, language: str = "pt", use_session: bool = True) -> Dict[str, Any]:
@@ -235,18 +232,16 @@ class ManaiFreemiumAzureClient:
         # Tentar primeiro a função freemium (se disponível)
         result = self._make_request("ManaiAgentFreemiumHttpTrigger", "POST", payload)
         
-         # Guardar informações da sessão se bem-sucedido
+        # Guardar informações da sessão se bem-sucedido
         if result.get('success') and use_session:
-            print("💾 Guardando sessão...")
-            thread_id = result.get('threadId') or result.get('ThreadId')
-            print(f"🔗 Sessão ID: {thread_id}")
-            session_id = result.get('sessionId') or result.get('SessionId')
+            thread_id = result.get('ThreadId') or result.get('threadId')
+            session_id = result.get('SessionId') or result.get('sessionId')
             
             if thread_id:
                 session_data = {
                     'ThreadId': thread_id,
                     'SessionId': session_id,
-                    'LastUsed': datetime.now().isoformat()
+                    'lastUsed': datetime.now().isoformat()
                 }
                 self._save_session(session_data)
         
@@ -328,8 +323,15 @@ def print_tier_info(client: ManaiFreemiumAzureClient):
     if tier_config.get('dailyQueryLimit', 0) > 0:
         today_usage = 0
         if usage_stats.get('success', True) and usage_stats.get('dailyStatistics'):
-            today_stats = next((s for s in usage_stats['dailyStatistics'] 
-                              if s['date'] == datetime.now().strftime('%Y-%m-%d')), None)
+            # Data de hoje
+            today_str = datetime.now().date()
+
+            # Buscar estatísticas de hoje
+            today_stats = next(
+                (s for s in usage_stats['dailyStatistics']
+                if datetime.fromisoformat(s['date']).date() == today_str),
+                None
+            )
             if today_stats:
                 today_usage = today_stats['queriesCount']
         
@@ -405,16 +407,7 @@ def interactive_login(client: ManaiFreemiumAzureClient):
         return True
     else:
         error_msg = result.get('error', '')
-        if "não encontrado" in error_msg.lower():
-            print("⚠️  Sistema de login freemium não disponível")
-            print("💡 Usando modo compatibilidade (sem autenticação)")
-            # Simular login bem-sucedido para compatibilidade
-            client.config["user"] = {"Email": email, "FirstName": "Utilizador", "tierType": "original"}
-            client.config["token"] = "compatibility_mode"
-            client._save_config()
-            return True
-        else:
-            print(f"❌ Erro no login: {error_msg}")
+        print(f"❌ Erro no login: {error_msg}")
         return False
 
 def main():
@@ -602,11 +595,10 @@ def main():
     
     # Processar pergunta
     if args.query:
-        # Para compatibilidade, permitir perguntas mesmo sem autenticação explícita
+        
         if not client.is_authenticated():
-            print("⚠️  Modo compatibilidade - usando função Azure original")
-            # Simular autenticação para compatibilidade
-            client.config["token"] = "compatibility_mode"
+            print("❌ Não autenticado. Execute 'manai login' primeiro.")
+            return
         
         # Verificar limites se sistema freemium disponível
         limits = client.check_usage_limits(args.language)
@@ -644,10 +636,10 @@ def main():
                     print(f"\n📊 Consultas hoje: {used} (ilimitadas)")
             
             # Mostrar informação da sessão
-            thread_id = result.get('threadId') or result.get('ThreadId')
+            thread_id = result.get('ThreadId') or result.get('ThreadId')
             if thread_id and not args.new_session:
                 thread_short = thread_id[-8:] if len(thread_id) > 8 else thread_id
-                print(f"💬 Sessão: ...{thread_short} (use --new-session para reiniciar)")
+                print(f"💬 Sessão: {thread_short}... (use --new-session para reiniciar)")
         else:
             print(f"\n❌ Erro: {result.get('error', 'Erro desconhecido')}")
             
