@@ -48,6 +48,7 @@
 5. **Run the installation script**:
    ```bash
    ./install_v2.sh
+   source ~/.bashrc
    ```
 6. **Configure language**:
    ```bash
