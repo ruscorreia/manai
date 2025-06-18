@@ -51,15 +51,15 @@
    ```
 6. **Restart the terminal**
    
+7. **Login**:
+   ```bash
+   manai --login
+   ```
 8. **Configure language**:
    ```bash
    manai "answer in English"
    ```
-9. **Login**:
-   ```bash
-   manai --login
-   ```
-10. **Test with an example**:
+9. **Test with an example**:
 ```bash
 # Simple question
 manai "how to list hidden files in Linux?"
