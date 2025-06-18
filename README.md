@@ -51,9 +51,9 @@
    ```
 6. **Restart the terminal**
    
-7. **Login**:
+7. **Register**:
    ```bash
-   manai --login
+   manai --register
    ```
 8. **Test with an example**:
 ```bash
