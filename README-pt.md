@@ -51,15 +51,11 @@ O `manai` é um comando Linux que permite interagir com páginas de manual (man 
    ```
 6. **Reinicie o terminal**
    
-7. **Login**:
+7. **Registrar-se**:
    ```bash
-   manai --login
+   manai --register
    ```
-8. **Configurar o idioma**:
-   ```bash
-   manai "responda em Portugês"
-   ```
-9. **Teste com um exemplo**:
+8. **Teste com um exemplo**:
 ```bash
 # Pergunta simples
 manai "como listar ficheiros ocultos no Linux?"
