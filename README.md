@@ -48,13 +48,18 @@
 5. **Run the installation script**:
    ```bash
    ./install_v2.sh
-   source ~/.bashrc
    ```
-6. **Configure language**:
+6. **Restart the terminal**
+   
+8. **Configure language**:
    ```bash
    manai "answer in English"
    ```
-7. **Test with an example**:
+9. **Login**:
+   ```bash
+   manai --login
+   ```
+10. **Test with an example**:
 ```bash
 # Simple question
 manai "how to list hidden files in Linux?"
