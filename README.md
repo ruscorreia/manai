@@ -55,11 +55,7 @@
    ```bash
    manai --login
    ```
-8. **Configure language**:
-   ```bash
-   manai "answer in English"
-   ```
-9. **Test with an example**:
+8. **Test with an example**:
 ```bash
 # Simple question
 manai "how to list hidden files in Linux?"
