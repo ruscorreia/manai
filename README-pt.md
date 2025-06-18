@@ -48,13 +48,18 @@ O `manai` é um comando Linux que permite interagir com páginas de manual (man 
 5. **Execute o script de instalação**:
    ```bash
    ./install_v2.sh
-   source ~/.bashrc
    ```
-6. **Configurar o idioma**:
+6. **Reinicie o terminal**
+   
+7. **Login**:
+   ```bash
+   manai --login
+   ```
+8. **Configurar o idioma**:
    ```bash
    manai "responda em Portugês"
    ```
-7. **Teste com um exemplo**:
+9. **Teste com um exemplo**:
 ```bash
 # Pergunta simples
 manai "como listar ficheiros ocultos no Linux?"
