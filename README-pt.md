@@ -9,7 +9,7 @@
 
 **Transforme a sua experiência com comandos Linux através de inteligência artificial**
 
-[🚀 Instalação](#instalação) • [📖 Documentação](#utilização) • [🤝 Contribuir](#contribuição) • [🌍 English](README-en.md)
+[🚀 Instalação](#instalação) • [📖 Documentação](#utilização) • [🤝 Contribuir](#contribuição) • [🌍 English](README.md)
 
 </div>
 
