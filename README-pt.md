@@ -1,211 +1,524 @@
-# Manai - Assistente Linux com IA (Versão 2.0)
-[Read this page in English](https://github.com/ruscorreia/manai/blob/main/README.md)
-## Descrição
+# ManAI - Assistente Linux Inteligente
 
-O `manai` é um comando Linux que permite interagir com páginas de manual (man pages) de forma intuitiva, utilizando linguagem natural e inteligência artificial. Esta versão 2.0 integra-se com uma Azure Function que comunica com um agente de IA no Azure AI Foundry.
+<div align="center">
 
-## Funcionalidades
+![ManAI Logo](https://img.shields.io/badge/ManAI-v2.0-blue?style=for-the-badge)
+[![Python](https://img.shields.io/badge/Python-3.6+-green?style=for-the-badge&logo=python)](https://python.org)
+[![Azure](https://img.shields.io/badge/Azure-Functions-blue?style=for-the-badge&logo=microsoft-azure)](https://azure.microsoft.com)
+[![Licença](https://img.shields.io/badge/Licença-MIT-yellow?style=for-the-badge)](LICENSE)
 
-### Versão 2.0 - Integração com Azure AI
-- **Processamento com IA Real**: Utiliza um agente de IA no Azure AI Foundry
-- **Suporte Multilingue**: Aceita perguntas em qualquer idioma e responde no mesmo idioma
-- **Sessões Contínuas**: Mantém contexto entre perguntas para conversações naturais
-- **Interface Melhorada**: Feedback visual e mensagens de erro mais claras
-- **Configuração Flexível**: Suporte para diferentes ambientes através de variáveis de ambiente
+**Transforme a sua experiência com comandos Linux através de inteligência artificial**
 
-### Funcionalidades Principais
-- **Interação por Linguagem Natural**: Aceita perguntas em português, inglês ou qualquer outro idioma
-- **Respostas Contextuais**: Fornece respostas precisas baseadas nas páginas man do Linux
-- **Gestão de Sessões**: Mantém o contexto da conversa para perguntas de seguimento
-- **Configuração Simples**: Fácil configuração através de variáveis de ambiente
+[🚀 Instalação](#instalação) • [📖 Documentação](#utilização) • [🤝 Contribuir](#contribuição) • [🌍 English](README-en.md)
 
-## Instalação
+</div>
 
-### Pré-requisitos
+---
 
-1. **Python 3.6 ou superior**
-2. **Biblioteca requests**: `pip install requests`
+## 🎯 Visão Geral
 
-### Passos de Instalação
+O **ManAI** revoluciona a forma como interage com o sistema Linux, transformando consultas em linguagem natural em respostas precisas e contextualizadas sobre comandos e funcionalidades do sistema. Desenvolvido pela Rosco Edutec, o ManAI elimina a barreira entre o conhecimento técnico e a utilização eficaz do terminal Linux.
 
-1. **Instale as dependências**:
-   ```bash
-   pip install requests
-   ```
-2. **Clone este repositorio**:
-   ```bash
-   git clone https://github.com/ruscorreia/manai.git
-   ```
-3. **Vá para a pasta de instalação**:
-   ```bash
-   cd manai/install/
-   ```
-4. **Torne os scripts executáveis**:
-   ```bash
-   chmod +x install_v2.sh
-   chmod +x uninstall_v2.sh
-   ```
-5. **Execute o script de instalação**:
-   ```bash
-   ./install_v2.sh
-   ```
-6. **Reinicie o terminal**
-   
-7. **Registrar-se**:
-   ```bash
-   manai --register
-   ```
-8. **Teste com um exemplo**:
+### 🔍 O Problema que Resolvemos
+
+Quantas vezes já se encontrou numa destas situações?
+
+- Precisava de um comando específico mas não se lembrava da sintaxe exacta
+- Gastou tempo a navegar por páginas man extensas para encontrar uma funcionalidade simples
+- Teve dificuldade em compreender opções complexas de comandos
+- Queria uma explicação clara e contextualizada em vez de documentação técnica densa
+
+O ManAI foi criado precisamente para resolver estes desafios, oferecendo uma interface intuitiva que compreende as suas necessidades e fornece respostas imediatas e práticas.
+
+### ✨ Por que Escolher o ManAI?
+
+**Inteligência Artificial Avançada**: Utiliza o poder do Azure AI Foundry para compreender e responder às suas perguntas com precisão excepcional.
+
+**Multilingue por Natureza**: Aceita perguntas em português, inglês, espanhol, francês, alemão, italiano, japonês, chinês, russo e árabe, respondendo sempre no idioma da pergunta.
+
+**Contexto Persistente**: Mantém o contexto das suas conversas, permitindo perguntas de seguimento naturais como "e como posso fazer isso com permissões específicas?"
+
+**Simplicidade de Utilização**: Uma única dependência Python e instalação automatizada tornam o ManAI acessível a todos os utilizadores Linux.
+
+**Integração Cloud Robusta**: Beneficia da escalabilidade e fiabilidade da infraestrutura Azure, garantindo respostas rápidas e disponibilidade constante.
+
+## 🚀 Funcionalidades Principais
+
+### 🧠 Processamento de IA Avançado
+O ManAI utiliza modelos de linguagem de última geração hospedados no Azure AI Foundry, garantindo respostas precisas, contextualizadas e actualizadas. O sistema compreende não apenas comandos básicos, mas também cenários complexos e fluxos de trabalho avançados.
+
+### 🌐 Suporte Multilingue Completo
+Comunique na sua língua preferida. O ManAI detecta automaticamente o idioma da sua pergunta e responde no mesmo idioma, mantendo a precisão técnica e a clareza da explicação.
+
+### 💬 Gestão Inteligente de Sessões
+O sistema mantém o contexto das suas conversas, permitindo diálogos naturais e progressivos. Pode fazer perguntas de seguimento, pedir esclarecimentos ou explorar tópicos relacionados sem perder o fio da conversa.
+
+### ⚡ Performance Optimizada
+Com tempos de resposta optimizados e cache inteligente, o ManAI fornece respostas rápidas mesmo para consultas complexas, mantendo a produtividade do seu fluxo de trabalho.
+
+### 🔒 Sistema de Utilizadores Robusto
+Inclui sistema completo de registo, autenticação e gestão de perfis, com suporte para diferentes níveis de acesso e funcionalidades premium.
+
+## 📋 Pré-requisitos
+
+Antes de instalar o ManAI, certifique-se de que o seu sistema cumpre os seguintes requisitos:
+
+### Sistema Operativo
+- **Linux**: Qualquer distribuição moderna (Ubuntu 18.04+, Debian 10+, CentOS 7+, Fedora 30+, Arch Linux)
+- **Arquitectura**: x86_64 (AMD64) ou ARM64
+
+### Software
+- **Python**: Versão 3.6 ou superior
+- **pip**: Gestor de pacotes Python (normalmente incluído com Python)
+- **curl**: Para comunicação HTTP (pré-instalado na maioria das distribuições)
+
+### Conectividade
+- **Ligação à Internet**: Necessária para comunicação com os serviços Azure
+- **Portas**: Acesso HTTPS (porta 443) para comunicação com a API
+
+### Verificação do Ambiente
+
+Execute os seguintes comandos para verificar se o seu sistema está preparado:
+
 ```bash
-# Pergunta simples
-manai "como listar ficheiros ocultos no Linux?"
+# Verificar versão do Python
+python3 --version
+
+# Verificar se pip está disponível
+pip3 --version
+
+# Verificar conectividade
+curl -s https://httpbin.org/ip
+```
+
+## 🛠 Instalação
+
+### Método Recomendado: Script Automático
+
+O método mais simples e seguro para instalar o ManAI:
+
+```bash
+# 1. Clonar o repositório
+git clone https://github.com/ruscorreia/manai.git
+cd manai
+
+# 2. Navegar para o directório de instalação
+cd install
+
+# 3. Tornar o script executável
+chmod +x install_v2.sh
+
+# 4. Executar a instalação
+./install_v2.sh
+
+# 5. Reiniciar o terminal ou recarregar o perfil
+source ~/.bashrc  # para bash
+# ou
+source ~/.zshrc   # para zsh
+```
+
+### Instalação Manual
+
+Para utilizadores que preferem controlo total sobre o processo:
+
+```bash
+# 1. Instalar dependências
+pip3 install --user requests
+
+# 2. Clonar e configurar
+git clone https://github.com/ruscorreia/manai.git
+cd manai/install
+
+# 3. Copiar para directório local
+mkdir -p ~/.local/bin
+cp manai.py ~/.local/bin/manai
+chmod +x ~/.local/bin/manai
+
+# 4. Adicionar ao PATH (se necessário)
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+### Verificação da Instalação
+
+Confirme que a instalação foi bem-sucedida:
+
+```bash
+# Verificar se o comando está disponível
+which manai
+
+# Testar conectividade
+manai --test-connection
+
+# Verificar versão
+manai --version
+```
+
+## 🎮 Primeiros Passos
+
+### 1. Registo de Utilizador
+
+Antes de utilizar o ManAI, é necessário criar uma conta:
+
+```bash
+manai --register
+```
+
+O sistema irá solicitar:
+- **Email**: O seu endereço de email (será o seu identificador)
+- **Password**: Palavra-passe segura (mínimo 8 caracteres)
+- **Nome**: Primeiro e último nome
+- **Idioma**: Idioma preferido para as respostas
+
+### 2. Primeiro Teste
+
+Após o registo, teste o sistema com uma pergunta simples:
+
+```bash
+manai "como listar ficheiros ocultos?"
+```
+
+### 3. Explorar Funcionalidades
+
+Experimente diferentes tipos de perguntas:
+
+```bash
+# Pergunta básica
+manai "como copiar ficheiros?"
+
+# Pergunta específica
+manai "como encontrar ficheiros modificados nas últimas 24 horas?"
 
 # Pergunta em inglês
-manai "how to create a directory with specific permissions?"
+manai "how to compress a folder with tar?"
+
+# Pergunta de seguimento (mantém contexto)
+manai "e como posso excluir determinados tipos de ficheiro?"
 ```
-   
-## Utilização
+
+## 📚 Utilização Detalhada
 
 ### Comandos Básicos
 
+#### Perguntas Simples
 ```bash
-# man pages
-manai memset
+# Comandos fundamentais
+manai "como criar um directório?"
+manai "como ver o conteúdo de um ficheiro?"
+manai "como alterar permissões de ficheiro?"
 
-# Pergunta simples
-manai "como listar ficheiros ocultos no Linux?"
-
-# Pergunta em inglês
-manai "how to create a directory with specific permissions?"
-
-# Ver informações de configuração
-manai --config
-
-# Iniciar nova sessão (ignorar contexto anterior)
-manai --new-session "como usar o comando find?"
-
-# Ver versão
-manai --version
-
-# Ver ajuda
-manai --help
+# Gestão de processos
+manai "como ver processos em execução?"
+manai "como terminar um processo?"
+manai "como executar um comando em segundo plano?"
 ```
 
-### Exemplos de Utilização
-
+#### Consultas Avançadas
 ```bash
-# Perguntas sobre comandos básicos
-manai memset
-manai "como copiar ficheiros?"
-manai "criar um directório"
-manai "ver o conteúdo de um ficheiro"
+# Operações complexas
+manai "como fazer backup incremental com rsync?"
+manai "como configurar um cron job para executar às 2h da manhã?"
+manai "como monitorizar utilização de disco em tempo real?"
 
-# Perguntas mais específicas
-manai "como encontrar ficheiros modificados nas últimas 24 horas?"
-manai "definir permissões 755 para um ficheiro"
-manai "comprimir uma pasta com tar"
-
-# Conversação contínua
-manai "como usar o comando grep?"
-manai "e como posso usar grep com expressões regulares?"
-manai "mostrar apenas o número da linha onde encontrou?"
+# Resolução de problemas
+manai "como resolver erro 'permission denied'?"
+manai "como recuperar espaço em disco?"
+manai "como diagnosticar problemas de rede?"
 ```
 
 ### Gestão de Sessões
 
-O manai mantém automaticamente o contexto da conversa:
+#### Sessões Contínuas
+O ManAI mantém automaticamente o contexto entre perguntas:
 
 ```bash
 # Primeira pergunta
-manai "como criar um utilizador no Linux?"
+manai "como usar o comando grep?"
 
-# Pergunta de seguimento (usa o contexto anterior)
-manai "e como definir uma palavra-passe para esse utilizador?"
+# Pergunta de seguimento (usa contexto anterior)
+manai "e como posso usar expressões regulares com ele?"
 
-# Iniciar nova conversa
-manai --new-session "como instalar pacotes com apt?"
+# Mais detalhes
+manai "podes dar um exemplo prático?"
 ```
 
-## Resolução de Problemas
+#### Nova Sessão
+Para começar uma conversa completamente nova:
 
-### Erro: "Erro de comunicação"
+```bash
+manai --new-session "como instalar software no Ubuntu?"
+```
 
-**Possíveis causas e soluções**:
+### Suporte Multilingue
 
-1. **Sem ligação à internet**: Verifique a sua conectividade
-2. **URL incorrecta**: Confirme a URL da Azure Function
-3. **Chave inválida**: Verifique a chave da função
-4. **Function App inactiva**: A função pode estar a "despertar" (cold start)
+#### Exemplos em Diferentes Idiomas
 
-### Erro: "Resposta inválida do servidor"
+**Português:**
+```bash
+manai "como comprimir uma pasta com tar?"
+```
 
-**Causa**: A Azure Function retornou uma resposta não-JSON.
+**Inglês:**
+```bash
+manai "how to find files larger than 100MB?"
+```
+
+**Espanhol:**
+```bash
+manai "¿cómo crear un usuario en Linux?"
+```
+
+**Francês:**
+```bash
+manai "comment changer le mot de passe d'un utilisateur?"
+```
+
+### Comandos de Gestão
+
+#### Informações da Conta
+```bash
+# Ver estado da conta
+manai --status
+
+# Ver estatísticas de utilização
+manai --stats
+
+# Verificar acesso a funcionalidades
+manai --check-feature "longTermMemory"
+```
+
+#### Gestão de Sessão
+```bash
+# Fazer login
+manai --login
+
+# Fazer logout
+manai --logout
+
+# Testar conectividade
+manai --test-connection
+```
+
+## 🔧 Configuração Avançada
+
+### Variáveis de Ambiente
+
+O ManAI pode ser configurado através de variáveis de ambiente:
+
+```bash
+# URL personalizada da API
+export MANAI_API_URL="https://sua-instancia.azurewebsites.net/api"
+
+# Chave de função personalizada
+export MANAI_FUNCTION_KEY="sua-chave-personalizada"
+
+# Idioma padrão
+export MANAI_DEFAULT_LANGUAGE="en"
+```
+
+### Ficheiros de Configuração
+
+O ManAI armazena configurações em:
+- **Configuração**: `~/.config/manai/config.json`
+- **Sessão**: `~/.config/manai/session.json`
+
+### Personalização
+
+#### Aliases Úteis
+Adicione ao seu `.bashrc` ou `.zshrc`:
+
+```bash
+# Aliases para uso frequente
+alias m="manai"
+alias mhelp="manai --help"
+alias mstatus="manai --status"
+alias mnew="manai --new-session"
+```
+
+## 🚨 Resolução de Problemas
+
+### Problemas Comuns
+
+#### Erro: "Não autenticado"
+**Sintoma**: Mensagem "É necessário fazer login primeiro"
+**Solução**:
+```bash
+manai --login
+```
+
+#### Erro: "Limite de consultas atingido"
+**Sintoma**: Mensagem sobre limite diário
+**Soluções**:
+- Aguardar até ao dia seguinte
+- Considerar upgrade para ManAI Pro
+- Verificar estatísticas: `manai --stats`
+
+#### Erro: "Erro de comunicação"
+**Sintomas**: Timeouts ou falhas de conexão
+**Diagnóstico**:
+```bash
+# Testar conectividade básica
+ping google.com
+
+# Testar conectividade específica do ManAI
+manai --test-connection
+
+# Verificar configuração
+manai --status
+```
 
 **Soluções**:
-- Verifique se a Azure Function está a funcionar correctamente
-- Confirme se está a usar a URL correcta do endpoint
-- Verifique os logs da Azure Function para erros
+1. Verificar ligação à internet
+2. Confirmar que não há firewall a bloquear HTTPS
+3. Tentar novamente após alguns minutos
 
-### Problemas de Sessão
+#### Erro: "Resposta inválida do servidor"
+**Causa**: Problema temporário nos serviços Azure
+**Soluções**:
+1. Aguardar alguns minutos e tentar novamente
+2. Verificar estado dos serviços Azure
+3. Contactar suporte se persistir
 
-Se as sessões não estão a funcionar:
+### Diagnóstico Avançado
 
-1. **Verificar permissões**: O ficheiro `~/.manai_session` precisa de permissões de escrita
-2. **Espaço em disco**: Certifique-se de que há espaço disponível
-3. **Reiniciar sessão**: Use `--new-session` para começar de novo
+#### Verificação Completa do Sistema
+```bash
+# Script de diagnóstico completo
+echo "=== Diagnóstico ManAI ==="
+echo "Versão Python: $(python3 --version)"
+echo "Versão ManAI: $(manai --version)"
+echo "Conectividade:"
+manai --test-connection
+echo "Estado da conta:"
+manai --status
+```
 
-## Funcionalidades Avançadas
+#### Logs e Debug
+Para obter informações detalhadas de debug:
+```bash
+# Executar com verbose (se disponível)
+python3 ~/.local/bin/manai --debug "sua pergunta"
+```
 
-### Ficheiro de Sessão
+## 🤝 Contribuição
 
-O manai guarda o ID da thread em `~/.manai_session` para manter o contexto entre execuções. Este ficheiro é criado automaticamente e pode ser removido para reiniciar todas as sessões.
+### Como Contribuir
 
-### Timeout e Retry
+Agradecemos contribuições da comunidade! Existem várias formas de ajudar:
 
-- **Timeout**: 60 segundos por requisição
-- **Retry**: Não implementado (a Azure Function tem o seu próprio retry)
+#### Reportar Problemas
+1. Verificar se o problema já foi reportado
+2. Criar issue detalhada no GitHub
+3. Incluir informações do sistema e passos para reproduzir
 
-### Logging
+#### Sugerir Melhorias
+1. Abrir discussion no GitHub
+2. Descrever a funcionalidade proposta
+3. Explicar o benefício para os utilizadores
 
-Para debug, pode verificar:
-- Mensagens de erro detalhadas no terminal
-- Logs da Azure Function no portal Azure
-- Conectividade de rede
+#### Contribuir com Código
+1. Fork do repositório
+2. Criar branch para a funcionalidade
+3. Implementar alterações com testes
+4. Submeter pull request
 
-## Desenvolvimento
+### Padrões de Desenvolvimento
 
-### Estrutura do Código
+#### Estilo de Código
+- Seguir PEP 8 para Python
+- Usar type hints quando possível
+- Documentar funções e classes
+- Manter compatibilidade com Python 3.6+
 
-- `ManaiClient`: Classe principal para comunicação com a Azure Function
-- `get_config()`: Gestão de configuração
-- `main()`: Interface de linha de comando
+#### Testes
+- Escrever testes para novas funcionalidades
+- Garantir que todos os testes passam
+- Manter cobertura de testes elevada
 
-### Dependências
+## 📊 Roadmap
 
-- `requests`: Para comunicação HTTP
-- `json`: Para processamento de dados
-- `argparse`: Para interface de linha de comando
-- `os`: Para variáveis de ambiente e ficheiros
+### Versão 2.1 (Próxima)
+- Cache local para respostas frequentes
+- Suporte para configurações personalizadas
+- Melhorias na interface de utilizador
+- Optimizações de performance
 
-## Licença
+### Versão 2.2
+- Plugin system para extensões
+- Integração com editores de código
+- Suporte para scripts personalizados
+- Analytics avançados
 
-Este projeto está licenciado sob a [Licença MIT](LICENSE).
+### Versão 3.0 (Futuro)
+- Interface gráfica opcional
+- Suporte para outros sistemas operativos
+- IA local para funcionalidades básicas
+- Integração com ferramentas DevOps
 
-## Suporte
+## 📄 Licença
 
-Para problemas ou sugestões:
-1. Verifique a secção de resolução de problemas
-2. Confirme a configuração da Azure Function
-3. Verifique os logs da Azure Function no portal Azure
+Este projeto está licenciado sob a [Licença MIT](LICENSE). Isto significa que pode:
 
-## Changelog
+- ✅ Usar comercialmente
+- ✅ Modificar o código
+- ✅ Distribuir
+- ✅ Usar privadamente
 
-### Versão 2.0.0
-- Integração completa com Azure Function
-- Suporte para múltiplos idiomas
-- Sistema de sessões melhorado
-- Interface de utilizador aprimorada
-- Configuração através de variáveis de ambiente
+**Condições:**
+- Incluir a licença e copyright
+- Não responsabilizar os autores
 
-### Versão 1.0.0
-- Versão inicial com processamento local básico
+## 🙏 Agradecimentos
+
+### Equipa de Desenvolvimento
+- **Rosco Edutec**: Desenvolvimento principal e arquitectura
+- **Comunidade**: Contribuições, testes e feedback
+
+### Tecnologias Utilizadas
+- **Python**: Linguagem de programação principal
+- **Azure Functions**: Infraestrutura cloud
+- **Azure AI Foundry**: Motor de inteligência artificial
+- **Requests**: Biblioteca HTTP para Python
+
+### Inspiração
+O ManAI foi inspirado pela necessidade de tornar o Linux mais acessível a utilizadores de todos os níveis, combinando a potência dos comandos tradicionais com a intuitividade da linguagem natural.
+
+## 📞 Suporte
+
+### Canais de Suporte
+
+**GitHub Issues**: Para reportar bugs e solicitar funcionalidades
+- [Reportar Bug](https://github.com/ruscorreia/manai/issues/new?template=bug_report.md)
+- [Solicitar Funcionalidade](https://github.com/ruscorreia/manai/issues/new?template=feature_request.md)
+
+**Discussions**: Para perguntas gerais e discussões
+- [GitHub Discussions](https://github.com/ruscorreia/manai/discussions)
+
+**Email**: Para questões comerciais ou parcerias
+- rusacorreia@hotmail.com
+
+### FAQ
+
+**P: O ManAI funciona offline?**
+R: Não, o ManAI requer ligação à internet para comunicar com os serviços Azure AI.
+
+**P: Existe limite de utilização?**
+R: Sim, contas gratuitas têm limite diário. Contacte-nos para opções premium.
+
+**P: Os meus dados são seguros?**
+R: Sim, seguimos as melhores práticas de segurança e privacidade. As perguntas são processadas de forma segura e não são armazenadas permanentemente.
+
+**P: Posso usar o ManAI em scripts?**
+R: Sim, o ManAI pode ser integrado em scripts bash e outros automatismos.
+
+---
+
+<div align="center">
+
+**Desenvolvido com ❤️ pela [Rosco Edutec](https://github.com/ruscorreia)**
+
+[⬆️ Voltar ao topo](#manai---assistente-linux-inteligente)
+
+</div>
+
+
